@@ -25,3 +25,7 @@ Route::get('/tentang', function () {
 Route::get('/info', function () {
     return redirect()->route('tentang');
 });
+
+Route::get('/daftar-konser', function () {
+    return view('konser');
+});
