@@ -11,3 +11,36 @@ Laravel Installer: 5.32.0
 Jumlah data pada tabel `promotors` tetap 3 baris dan tabel `konsers` tetap 5 baris meskipun perintah `php artisan migrate:fresh --seed` dijalankan berulang kali.
 
 Hal ini karena perintah `migrate:fresh` menghapus seluruh tabel terlebih dahulu, kemudian membuat ulang tabel berdasarkan migration. Setelah itu, opsi `--seed` menjalankan `DatabaseSeeder` untuk memasukkan kembali data awal yang sudah ditentukan. Oleh karena itu, data sebelumnya tidak menumpuk karena selalu dibuat ulang dari awal dengan jumlah yang sama.
+
+## Cara Menjalankan Proyek TiketWar
+
+1. Nyalakan MySQL di XAMPP dan buat database `tiketwar` di phpMyAdmin.
+2. Masuk ke folder proyek: `cd tiketwar`.
+3. Install dependency: `composer install`.
+4. Salin `.env.example` menjadi `.env`:
+   ```bash
+   copy .env.example .env
+   ```
+5. Sesuaikan konfigurasi database di `.env`, lalu jalankan:
+   ```bash
+   php artisan key:generate
+   ```
+6. Jalankan migration dan seeder:
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+7. Jalankan server:
+   ```bash
+   php artisan serve
+   ```
+
+## Jawaban Latihan Debugging
+
+1. **Koneksi ditolak:** MySQL belum berjalan atau konfigurasi database di `.env` salah. Perbaiki dengan menjalankan MySQL dan memeriksa konfigurasi database.
+2. **Model belum punya `$fillable`:** Kolom belum didaftarkan pada `$fillable`. Tambahkan nama kolom yang diizinkan pada model.
+3. **419 Page Expired:** Token CSRF belum disertakan. Tambahkan `@csrf` di dalam form.
+4. **405 Method Not Allowed:** Method form tidak sesuai dengan route. Tambahkan `@method('PUT')` jika route menggunakan PUT.
+
+## Jawaban Pertanyaan Seeder
+
+Data tidak bertambah berulang kali karena `migrate:fresh` menghapus seluruh tabel dan membuatnya kembali. Setelah itu, `--seed` menjalankan DatabaseSeeder untuk memasukkan data awal kembali, sehingga jumlah data tetap sama.

@@ -11,4 +11,33 @@ TiketWar">
         <p class="lead">Tempat war tiket konser paling gercep!</p> 
         <a href="{{ route('konser.index') }}" class="btn btn-light btn-lg">Lihat Daftar Konser</a> 
     </div> 
-@endsection
+
+    <div class="row text-center mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Konser</h5>
+                    <h2>{{ $jumlahKonser }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Promotor</h5>
+                    <h2>{{ $jumlahPromotor }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Sisa Tiket</h5>
+                    <h2>{{ $totalSisa }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection 
