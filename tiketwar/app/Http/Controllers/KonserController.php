@@ -10,11 +10,19 @@ use Illuminate\View\View;
 
 class KonserController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $daftarKonser = Konser::with('promotor')->orderBy('tanggal')->get();
+        $daftarKonser = Konser::with('promotor')
+            ->when($request->query('kota'), fn ($query, $kota) => $query->where('kota', $kota))
+            ->orderBy('tanggal')
+            ->get();
 
-        return view('konser', compact('daftarKonser'));
+        $daftarKota = Konser::select('kota')
+            ->distinct()
+            ->orderBy('kota')
+            ->pluck('kota');
+
+        return view('konser', compact('daftarKonser', 'daftarKota'));
     }
 
     public function show($id): View
