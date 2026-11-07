@@ -64,3 +64,12 @@
         @enderror
     </div>
 </div>
+
+<div class="mb-3">
+    <label for="deskripsi" class="form-label">Deskripsi</label>
+    <textarea name="deskripsi" id="deskripsi" rows="4"
+              class="form-control @error('deskripsi') is-invalid @enderror">{{ old('deskripsi', $konser->deskripsi ?? '') }}</textarea>
+    @error('deskripsi')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
