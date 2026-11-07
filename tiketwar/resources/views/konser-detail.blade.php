@@ -19,6 +19,18 @@ daftar</a>
             @else 
                 <button class="btn btn-secondary" disabled>Sold Out</button> 
             @endif 
+
+            @if ($konser['sisa'] == 0)
+                @include('partials.alert', [
+                    'tipe' => 'danger',
+                    'pesan' => 'Maaf, tiket konser ini sudah habis.'
+                ])
+            @elseif ($konser['sisa'] < 10)
+                @include('partials.alert', [
+                    'tipe' => 'warning',
+                    'pesan' => 'Tiket hampir habis! Segera pesan.'
+                ])
+            @endif
         </div> 
     </div> 
 @endsection 
