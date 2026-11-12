@@ -44,3 +44,7 @@ Hal ini karena perintah `migrate:fresh` menghapus seluruh tabel terlebih dahulu,
 ## Jawaban Pertanyaan Seeder
 
 Data tidak bertambah berulang kali karena `migrate:fresh` menghapus seluruh tabel dan membuatnya kembali. Setelah itu, `--seed` menjalankan DatabaseSeeder untuk memasukkan data awal kembali, sehingga jumlah data tetap sama.
+
+## Jawaban Latihan Debugging 
+1. Total dari form: menjelaskan bahaya mengambil nilai total dari input form karena pengguna bisa memanipulasinya melalui DevTools. Perbaikannya: total harus dihitung oleh server menggunakan harga konser × jumlah tiket.
+2. Pengecekan stok tanpa kunci: menjelaskan risiko dua pembeli memesan tiket bersamaan karena memakai data stok lama. Perbaikannya: gunakan DB::transaction() dan lockForUpdate() untuk membaca stok terbaru sebelum mengurangi stok.

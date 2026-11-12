@@ -5,6 +5,7 @@ use App\Http\Controllers\PromotorController;
 use App\Models\Konser;
 use App\Models\Promotor;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PesananController;
 
 Route::get('/', function () {
     $jumlahKonser = Konser::count();
@@ -54,3 +55,9 @@ Route::put('/promotor/{id}', [PromotorController::class, 'update'])
 
 Route::delete('/promotor/{id}', [PromotorController::class, 'destroy'])
     ->whereNumber('id')->name('promotor.destroy');
+
+Route::get('/konser/{konser}/pesan', [PesananController::class, 'create'])
+ ->whereNumber('konser')->name('pesanan.create');
+
+ Route::post('/konser/{konser}/pesan', [PesananController::class, 'store'])
+ ->whereNumber('konser')->name('pesanan.store');
