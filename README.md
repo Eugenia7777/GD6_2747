@@ -69,7 +69,7 @@ Perbaikan: Buat view PDF yang berdiri sendiri tanpa @extends('layouts.main'), na
 
 ## Modul 8 – API dan Autentikasi
 
-Debugging 1: Pesanan dari Semua Isian
+**Debugging 1: Pesanan dari Semua Isian**
 Kesalahan: Menggunakan Pesanan::create($request->all()); untuk membuat pesanan.
 
 Berbahaya karena $request->all() mengambil seluruh data yang dikirim pengguna, termasuk data yang seharusnya ditentukan oleh server seperti konser_id, harga_satuan, total, dan status.
@@ -77,7 +77,7 @@ Pengguna dapat mengirim nilai seperti harga_satuan sebesar 1, total sebesar 1, d
 
 Perbaikan: Gunakan $request->validate([...]) untuk memvalidasi dan mengambil hanya data yang boleh diisi pengguna, yaitu nama_pemesan, email, dan jumlah. Selanjutnya, konser_id diambil dari konser yang dipilih, harga_satuan dan total dihitung oleh server, serta status ditentukan oleh server menggunakan Pesanan::MENUNGGU_BAYAR.
 
-Debugging 2: Postman Menerima HTML
+**Debugging 2: Postman Menerima HTML**
 Kesalahan: Request GET /api/user tidak menyertakan header Accept: application/json.
 
 Penyebabnya: Laravel menganggap request berasal dari browser dan bukan program API. Middleware auth akan menangani pengguna yang belum login dengan mengarahkan pengguna ke halaman login.
@@ -89,8 +89,7 @@ Perbaikan: Tambahkan header berikut pada request API:
 Accept: application/json
 Dengan header tersebut, Laravel mengetahui bahwa klien mengharapkan respons JSON. Jika pengguna belum terautentikasi, API akan membalas status 401 dengan JSON berisi pesan Unauthenticated..
 
-## 7.7 Latihan Debugging
-Debugging 3: Login yang selalu 419
+**Debugging 3: Login yang selalu 419**
 Kesalahannya karena Form login menggunakan method `POST`, tetapi tidak memiliki directive `@csrf`.
 
 Berbahaya karena Laravel memeriksa token CSRF pada setiap request POST untuk memastikan request berasal dari form yang sah. Tanpa token CSRF, Laravel menolak request dan menampilkan error `419 Page Expired`.
@@ -108,7 +107,7 @@ Perbaikan: Tambahkan `@csrf` di dalam form:
 </form>
 ```
 
-Debugging 4: Login buatan sendiri
+**Debugging 4: Login buatan sendiri**
 Kesalahannya karena kode login melakukan pencarian pengguna berdasarkan email, kemudian membandingkan password dari request secara langsung dengan nilai password di database.
 
 Berbahaya karena:
@@ -137,3 +136,23 @@ $request->session()->regenerate();
 
 return redirect()->intended(route('pesanan.index'));
 ```
+
+**Debugging 5: Tombol hilang, halaman tetap terbuka**
+
+Kesalahannya karena Route untuk halaman tambah konser dan proses penyimpanan konser belum dilindungi middleware `auth`. Penggunaan `@auth` pada view hanya menyembunyikan tombol Tambah Konser dari pengunjung yang belum login, tetapi tidak mencegah mereka mengakses route secara langsung melalui address bar.
+
+Berbahaya karena pengunjung yang belum login tetap dapat membuka halaman `/konser/create` dan mengirimkan data konser baru melalui route POST `/konser`. Hal ini memungkinkan orang yang tidak memiliki akses admin untuk melakukan perubahan data.
+
+Perbaikan: Route untuk mengelola konser harus dimasukkan ke dalam grup middleware `auth`, sehingga hanya admin yang sudah login dapat mengaksesnya.
+
+```php
+Route::middleware('auth')->group(function () {
+    Route::get('/konser/create', [KonserController::class, 'create'])
+        ->name('konser.create');
+
+    Route::post('/konser', [KonserController::class, 'store'])
+        ->name('konser.store');
+});
+```
+
+Dengan demikian, `@auth` digunakan untuk mengatur tampilan tombol, sedangkan middleware `auth` digunakan untuk melindungi route dari akses yang tidak diizinkan.
