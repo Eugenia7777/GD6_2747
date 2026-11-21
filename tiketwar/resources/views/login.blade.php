@@ -7,7 +7,7 @@
         <div class="col-md-5">
             <h1 class="h4 mb-3">Login Admin</h1>
 
-            <form action="{{ route('login.proses') }}" method="POST">
+            <form action="{{ route('login.submit') }}" method="POST">
                 @csrf
 
                 <div class="mb-3">

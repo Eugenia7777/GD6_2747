@@ -51,4 +51,8 @@ class PesananController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+    public function index()
+    {
+        return PesananResource::collection(Pesanan::latest()->get());
+    }
 }
