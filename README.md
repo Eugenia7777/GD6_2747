@@ -88,3 +88,52 @@ Perbaikan: Tambahkan header berikut pada request API:
 
 Accept: application/json
 Dengan header tersebut, Laravel mengetahui bahwa klien mengharapkan respons JSON. Jika pengguna belum terautentikasi, API akan membalas status 401 dengan JSON berisi pesan Unauthenticated..
+
+## 7.7 Latihan Debugging
+Debugging 3: Login yang selalu 419
+Kesalahannya karena Form login menggunakan method `POST`, tetapi tidak memiliki directive `@csrf`.
+
+Berbahaya karena Laravel memeriksa token CSRF pada setiap request POST untuk memastikan request berasal dari form yang sah. Tanpa token CSRF, Laravel menolak request dan menampilkan error `419 Page Expired`.
+
+Mematikan pemeriksaan CSRF bukan solusi yang tepat karena dapat membuat aplikasi rentan terhadap serangan Cross-Site Request Forgery (CSRF). Penyerang dapat mencoba mengirim request atas nama pengguna yang sedang login tanpa sepengetahuan pengguna tersebut.
+
+Perbaikan: Tambahkan `@csrf` di dalam form:
+
+```blade
+<form action="{{ route('login.proses') }}" method="POST">
+    @csrf
+    <input type="email" name="email">
+    <input type="password" name="password">
+    <button type="submit">Masuk</button>
+</form>
+```
+
+Debugging 4: Login buatan sendiri
+Kesalahannya karena kode login melakukan pencarian pengguna berdasarkan email, kemudian membandingkan password dari request secara langsung dengan nilai password di database.
+
+Berbahaya karena:
+1. Password dibandingkan secara langsung, sehingga kode mengasumsikan password disimpan dalam bentuk teks biasa. Password seharusnya disimpan menggunakan hash agar tidak dapat dibaca secara langsung.
+2. Pesan kesalahan berbeda antara email yang tidak terdaftar dan password yang salah. Hal ini dapat digunakan untuk mengetahui email mana yang terdaftar di aplikasi.
+3. Kode tidak menggunakan `Auth::attempt()` untuk melakukan proses autentikasi sesuai mekanisme Laravel.
+4. Kode tidak melakukan regenerasi session setelah login berhasil. Hal ini dapat meningkatkan risiko session fixation.
+5. Kode tidak menggunakan `redirect()->intended()`, sehingga pengguna tidak diarahkan kembali ke halaman yang sebelumnya ingin dibuka setelah login.
+
+Perbaikan: Gunakan `Auth::attempt()` untuk memeriksa email dan password yang tersimpan dalam bentuk hash. Setelah login berhasil, lakukan regenerasi session dan gunakan `redirect()->intended()`.
+
+Contoh perbaikan:
+```php
+$credentials = $request->validate([
+    'email' => ['required', 'email'],
+    'password' => ['required'],
+]);
+
+if (! Auth::attempt($credentials)) {
+    return back()
+        ->withErrors(['email' => 'Email atau kata sandi salah.'])
+        ->onlyInput('email');
+}
+
+$request->session()->regenerate();
+
+return redirect()->intended(route('pesanan.index'));
+```
