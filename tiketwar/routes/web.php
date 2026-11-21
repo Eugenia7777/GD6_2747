@@ -47,7 +47,7 @@ Route::get('/kontak', function () {
 // ==================== AUTENTIKASI ====================
 
 // Form login
-Route::get('/login', [AuthController::class, 'showLoginForm'])
+Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
 
 // Proses login
