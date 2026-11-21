@@ -48,3 +48,43 @@ Data tidak bertambah berulang kali karena `migrate:fresh` menghapus seluruh tabe
 ## Jawaban Latihan Debugging 
 1. Total dari form: menjelaskan bahaya mengambil nilai total dari input form karena pengguna bisa memanipulasinya melalui DevTools. Perbaikannya: total harus dihitung oleh server menggunakan harga konser × jumlah tiket.
 2. Pengecekan stok tanpa kunci: menjelaskan risiko dua pembeli memesan tiket bersamaan karena memakai data stok lama. Perbaikannya: gunakan DB::transaction() dan lockForUpdate() untuk membaca stok terbaru sebelum mengurangi stok.
+
+## Modul 7 – Tugas Rumah: Laporan dan Ekspor PDF
+Debugging 3: Tanggal Sampai yang Hilang
+
+Kesalahan: Filter tanggal sampai menggunakan where('created_at', '<=', $sampai).
+
+Penyebabnya: Kolom created_at menyimpan tanggal dan jam, sedangkan nilai filter hanya berisi tanggal. Nilai tanggal seperti 2026-11-09 dianggap sebagai 2026-11-09 00:00:00. Pesanan yang dibuat pada hari tersebut pukul 14.30 menjadi lebih besar dari batas waktu tersebut, sehingga tidak ikut ditampilkan.
+Perbaikan: Gunakan whereDate() agar perbandingan hanya berdasarkan tanggal dan mengabaikan jam.
+
+->when($request->query('sampai'), function ($query, $sampai) {
+    $query->whereDate('created_at', '<=', $sampai);
+})
+
+Debugging 4: PDF Berantakan
+Kesalahan: View PDF masih menggunakan @extends('layouts.main'), sehingga layout halaman web ikut dimuat.
+
+Penyebabnya: Layout web berisi navbar, footer, dan Bootstrap yang dimuat dari CDN. Dompdf tidak mengambil CSS Bootstrap dari CDN, sehingga tampilan PDF tidak mendapatkan gaya yang sesuai dan kolom tabel menjadi tidak rapi.
+Perbaikan: Buat view PDF yang berdiri sendiri tanpa @extends('layouts.main'), navbar, dan footer halaman web. Gunakan struktur HTML sederhana serta tuliskan CSS langsung di dalam view laporan-pdf.blade.php, karena Dompdf tidak memuat CSS dari CDN dan hanya mendukung CSS 2.1.
+
+## Modul 8 – API dan Autentikasi
+
+Debugging 1: Pesanan dari Semua Isian
+Kesalahan: Menggunakan Pesanan::create($request->all()); untuk membuat pesanan.
+
+Berbahaya karena $request->all() mengambil seluruh data yang dikirim pengguna, termasuk data yang seharusnya ditentukan oleh server seperti konser_id, harga_satuan, total, dan status.
+Pengguna dapat mengirim nilai seperti harga_satuan sebesar 1, total sebesar 1, dan status sebesar lunas. Jika kolom tersebut termasuk dalam $fillable pada model Pesanan, nilai yang dikirim pengguna dapat tersimpan ke database. Akibatnya, pengguna dapat membuat pesanan dengan harga yang tidak sesuai atau mengubah status pesanan menjadi lunas tanpa pembayaran.
+
+Perbaikan: Gunakan $request->validate([...]) untuk memvalidasi dan mengambil hanya data yang boleh diisi pengguna, yaitu nama_pemesan, email, dan jumlah. Selanjutnya, konser_id diambil dari konser yang dipilih, harga_satuan dan total dihitung oleh server, serta status ditentukan oleh server menggunakan Pesanan::MENUNGGU_BAYAR.
+
+Debugging 2: Postman Menerima HTML
+Kesalahan: Request GET /api/user tidak menyertakan header Accept: application/json.
+
+Penyebabnya: Laravel menganggap request berasal dari browser dan bukan program API. Middleware auth akan menangani pengguna yang belum login dengan mengarahkan pengguna ke halaman login.
+
+Jika route login belum dibuat, Laravel menampilkan error Route [login] not defined. Jika route login sudah tersedia, request dapat diarahkan ke halaman login HTML dengan status 200, bukan mendapatkan respons JSON dengan status 401.
+
+Perbaikan: Tambahkan header berikut pada request API:
+
+Accept: application/json
+Dengan header tersebut, Laravel mengetahui bahwa klien mengharapkan respons JSON. Jika pengguna belum terautentikasi, API akan membalas status 401 dengan JSON berisi pesan Unauthenticated..
