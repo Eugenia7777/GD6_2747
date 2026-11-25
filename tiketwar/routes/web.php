@@ -52,6 +52,7 @@ Route::get('/login', [AuthController::class, 'showLogin'])
 
 // Proses login
 Route::post('/login', [AuthController::class, 'login'])
+    ->middleware(['guest', 'throttle:login'])
     ->name('login.submit');
 
 // Logout
